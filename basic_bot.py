@@ -1,7 +1,7 @@
 import tweepy
 import gspread
 
-gc = gspread.service_account('credentials.json')
+gc = gspread.service_account('credentials_last_tweet.json')
 
 # Open a sheet from a spreadsheet in one go
 wks = gc.open("last-tweet-id").sheet1

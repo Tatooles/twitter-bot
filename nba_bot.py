@@ -2,10 +2,10 @@ import tweepy
 import gspread
 import sys
 
-gc = gspread.service_account('credentials.json')
+tweet_sheet = gspread.service_account('credentials_last_tweet.json')
 
 # Open a sheet from a spreadsheet in one go
-wks = gc.open("last-tweet-id").sheet1
+last_tweet = tweet_sheet.open("last-tweet-id").sheet1
 
 consumerKey = 'IODvXnxsaiG8cU7MtY4XZhyLN'
 consumerSecret = 'R9uqkxEXxQdmYFxFwdOSIqibi17WLqDH45QDAC337uC6lYcRWQ'
@@ -16,10 +16,10 @@ accessToken_secret = 'lFwfVInbbgJOQ1gmgMmr7U7jHn7ZLygTTcPGrRXJhPg5G'
 client = tweepy.Client(consumer_key=consumerKey, consumer_secret=consumerSecret, access_token=accessToken, access_token_secret=accessToken_secret)
 
 def storeId(last_seen_id):
-    wks.update('A2', str(last_seen_id))
+    last_tweet.update('A2', str(last_seen_id))
 
 def retrieveId():
-    return int(wks.acell('A2').value)
+    return int(last_tweet.acell('A2').value)
 
 # This function takes in a request string from the user, and returns what the bot will respond with
 def return_stats(request_string):
