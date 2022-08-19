@@ -7,7 +7,7 @@ import gspread
 gc = gspread.service_account('credentials.json')
 
 # Open a sheet from a spreadsheet in one go
-nba_stats = gc.open("nba-stats-test").sheet1
+nba_stats = gc.open("nba-stats").sheet1
 
 request_url = "https://stats.nba.com/stats/leaguedashplayerstats?College=&Conference=&Country=&DateFrom=&DateTo=&Division=&DraftPick=&DraftYear=&GameScope=&GameSegment=&Height=&LastNGames=0&LeagueID=00&Location=&MeasureType=Base&Month=0&OpponentTeamID=0&Outcome=&PORound=0&PaceAdjust=N&PerMode=PerGame&Period=0&PlayerExperience=&PlayerPosition=&PlusMinus=N&Rank=N&Season=2021-22&SeasonSegment=&SeasonType=Regular+Season&ShotClockRange=&StarterBench=&TeamID=0&TwoWay=0&VsConference=&VsDivision=&Weight="
 
@@ -71,6 +71,7 @@ for season in seasons:
     request_url = f"https://stats.nba.com/stats/leaguedashplayerstats?College=&Conference=&Country=&DateFrom=&DateTo=&Division=&DraftPick=&DraftYear=&GameScope=&GameSegment=&Height=&LastNGames=0&LeagueID=00&Location=&MeasureType=Base&Month=0&OpponentTeamID=0&Outcome=&PORound=0&PaceAdjust=N&PerMode=PerGame&Period=0&PlayerExperience=&PlayerPosition=&PlusMinus=N&Rank=N&Season={season}&SeasonSegment=&SeasonType=Regular+Season&ShotClockRange=&StarterBench=&TeamID=0&TwoWay=0&VsConference=&VsDivision=&Weight="
     response = requests.get(url=request_url, headers=headers).json()
     player_info = response['resultSets'][0]['rowSet']
+    # TODO: Make this all lowercase
     df = pd.DataFrame(player_info, columns=column_names)
     df['season_id'] = season
     print(season)
