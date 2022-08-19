@@ -1,11 +1,15 @@
+# TODO: Add file comment
+
 import tweepy
 import gspread
+import pandas as pd
 import sys
 
-tweet_sheet = gspread.service_account('credentials_last_tweet.json')
+gc = gspread.service_account('credentials.json')
 
 # Open a sheet from a spreadsheet in one go
-last_tweet = tweet_sheet.open("last-tweet-id").sheet1
+last_tweet = gc.open("last-tweet-id").sheet1
+nba_stats = gc.open("nba-stats").sheet1
 
 consumerKey = 'IODvXnxsaiG8cU7MtY4XZhyLN'
 consumerSecret = 'R9uqkxEXxQdmYFxFwdOSIqibi17WLqDH45QDAC337uC6lYcRWQ'
@@ -28,7 +32,11 @@ def return_stats(request_string):
     tokens = request_string.split()
     if(tokens[1] != 'NBA'):
         return 'ERROR - I could not process your request. Reason: Invalid sport. Please request a valid sport. Currently supported sports: NBA'
-    return ''
+    df = pd.DataFrame(nba_stats.get_all_records())
+    name = f'{tokens[2]} {tokens[3]}'
+    season = df[(df['PLAYER_NAME'] == name) & (df['season_id'] == tokens[4])]
+    stat = season.iloc[0][tokens[5]]
+    return f'{name} averaged {stat} {tokens[5]} in the {tokens[4]} season'
 
 lastId = retrieveId()
 response = client.get_users_mentions(id=1478092305361952769, since_id=lastId, expansions=['author_id'], user_auth=True)
@@ -41,4 +49,12 @@ if tweets:
         client.create_tweet(text=tweet_text, in_reply_to_tweet_id=tweet.id)
 
 if __name__ == '__main__':
+    #df = pd.DataFrame(nba_stats.get_all_records())
+    #print(df.query("PLAYER_NAME == `Zach LaVine`"))
+    # print('break')
+    # # Get all years for a specific player
+    # season = df[(df['PLAYER_NAME'] == 'Zach LaVine') & (df['season_id'] == '2020-21')]
+    # print(season)
+    # print(type(season))
+    # print(season.iloc[0]['PTS'])
     print(return_stats(sys.argv[1]))
