@@ -81,7 +81,7 @@ def process_request(request_string):
     except exceptions.InvalidLeagueException:
         return 'ERROR - I could not process your request. Please request a valid sport. Currently supported sport: NBA'
     except exceptions.InvalidArgumentCountException:
-        return 'ERROR - I could not process your request. Incorrect number of arguments, I need 6 arguments to make a valid query (@sportstatsgenie, league, first_name, last_name, season, stat'
+        return 'ERROR - I could not process your request. Incorrect number of arguments, I need 6 arguments to make a valid query (@sportstatsgenie, league, first_name, last_name, season, stat)'
     except:
         return "ERROR - I could not process your request. Unknown exception occurred"
 
