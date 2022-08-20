@@ -1,4 +1,5 @@
 gspread_credentials.json
 tweepy_credentials.json
 basic_bot.py
+requirements.txt
 __pycache__/
