@@ -1,4 +1,7 @@
-# TODO: Add file comment
+'''
+Test suite for the NBA Twitter bot.
+Tests a couple example Tweets to make sure the bot will respond properly
+'''
 import unittest
 import warnings
 import nba_bot
@@ -10,7 +13,6 @@ class TestCalc(unittest.TestCase):
         warnings.filterwarnings(action="ignore", message="unclosed", category=ResourceWarning)
         nba_bot.setup()
 
-    # TODO: Add more tests
     def test_return_stats(self):
         result1 = nba_bot.process_request('@sportstatsgenie NBA Zach LaVine 2020-21 PTS')
         result2 = nba_bot.process_request('@sportstatsgenie NBA Michael Jordan 1997-98 PTS')
