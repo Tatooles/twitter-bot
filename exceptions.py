@@ -16,3 +16,8 @@ class InvalidLeagueException(NBABotException):
     '''
     When the bot is not able to parse a valid league from the user's input
     '''
+
+class InvalidArgumentCountException(NBABotException):
+    '''
+    When the user's request does not have the correct number of arguments to make a valid query
+    '''
