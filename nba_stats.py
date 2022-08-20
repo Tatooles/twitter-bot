@@ -108,7 +108,6 @@ def fetch_data(seasons):
         request_url = f"https://stats.nba.com/stats/leaguedashplayerstats?College=&Conference=&Country=&DateFrom=&DateTo=&Division=&DraftPick=&DraftYear=&GameScope=&GameSegment=&Height=&LastNGames=0&LeagueID=00&Location=&MeasureType=Base&Month=0&OpponentTeamID=0&Outcome=&PORound=0&PaceAdjust=N&PerMode=PerGame&Period=0&PlayerExperience=&PlayerPosition=&PlusMinus=N&Rank=N&Season={season}&SeasonSegment=&SeasonType=Regular+Season&ShotClockRange=&StarterBench=&TeamID=0&TwoWay=0&VsConference=&VsDivision=&Weight="
         response = requests.get(url=request_url, headers=headers).json()
         player_info = response['resultSets'][0]['rowSet']
-        # TODO: Make this all lowercase
         df = pd.DataFrame(player_info, columns=column_names)
         df['season_id'] = season
         print(season)
@@ -123,7 +122,7 @@ def save_data(data):
 
     :param data: NBA stat data in the form of a dataframe
     '''
-    gc = gspread.service_account('credentials.json')
+    gc = gspread.service_account('gspread_credentials.json')
 
     # Open a sheet from a spreadsheet in one go
     nba_stats = gc.open("nba-stats").sheet1
@@ -163,5 +162,9 @@ if __name__ == '__main__':
     ]
 
     data = fetch_data(seasons)
+    # Convert all text data to lowercase because tweet will be converted to lowercase
+    data = data.applymap(lambda s: s.lower() if type(s) == str else s)
+    # Want columns also lowercase
+    data.columns = data.columns.str.lower()
     save_data(data)
     

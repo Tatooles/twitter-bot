@@ -39,7 +39,7 @@ def check_errors(request_string):
     if(tokens[0] != '@sportstatsgenie'):
         raise exceptions.InvalidAtException
 
-    if(tokens[1] != 'NBA'):
+    if(tokens[1] != 'nba'):
         raise exceptions.InvalidLeagueException
 
     # TODO: Would like to be able to determine whether the user requested a valid player but that's gonna be tough
@@ -48,7 +48,16 @@ def return_stats(valid_string):
     '''
     Takes in a valid request string and returns the stats the user requested.
     '''
-    pass
+    tokens = valid_string.split()
+    nba_stats = gc.open("nba-stats").sheet1
+    df = pd.DataFrame(nba_stats.get_all_records())
+    try:
+        name = f'{tokens[2]} {tokens[3]}'
+        season = df[(df['player_name'] == name) & (df['season_id'] == tokens[4])]
+        stat = season.iloc[0][tokens[5]]
+    except:
+        return 'ERROR - I could not process your request. Couldn\'t complete a valid query with the information you provided'
+    return f'{tokens[2].capitalize()} {tokens[3].capitalize()} averaged {stat} {tokens[5]} in the {tokens[4]} season'
 
 def process_request(request_string):
     '''
@@ -60,6 +69,7 @@ def process_request(request_string):
 
     :param request_string: The input from twitter of what the user
     '''
+    request_string = request_string.lower()
     try:
         check_errors(request_string)
     except exceptions.InvalidAtException:
@@ -69,14 +79,7 @@ def process_request(request_string):
     except:
         return "ERROR - I could not process your request. Unknown exception occurred"
 
-    
-    tokens = request_string.split()
-    nba_stats = gc.open("nba-stats").sheet1
-    df = pd.DataFrame(nba_stats.get_all_records())
-    name = f'{tokens[2]} {tokens[3]}'
-    season = df[(df['PLAYER_NAME'] == name) & (df['season_id'] == tokens[4])]
-    stat = season.iloc[0][tokens[5]]
-    return f'{name} averaged {stat} {tokens[5]} in the {tokens[4]} season'
+    return return_stats(request_string)
 
 def process_tweet():
     lastId = retrieveId()
@@ -91,12 +94,4 @@ def process_tweet():
             client.create_tweet(text=tweet_text, in_reply_to_tweet_id=tweet.id)
 
 if __name__ == '__main__':
-    #df = pd.DataFrame(nba_stats.get_all_records())
-    #print(df.query("PLAYER_NAME == `Zach LaVine`"))
-    # print('break')
-    # # Get all years for a specific player
-    # season = df[(df['PLAYER_NAME'] == 'Zach LaVine') & (df['season_id'] == '2020-21')]
-    # print(season)
-    # print(type(season))
-    # print(season.iloc[0]['PTS'])
     print(process_request(sys.argv[1]))
