@@ -1,2 +1,4 @@
-credentials.json
+gspread_credentials.json
+tweepy_creadentials.json
+basic_bot.py
 __pycache__/

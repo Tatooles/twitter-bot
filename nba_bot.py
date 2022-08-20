@@ -1,6 +1,7 @@
 # TODO: Add file comment
 
 import sys
+import json
 import pandas as pd
 import tweepy
 import gspread
@@ -11,20 +12,17 @@ def setup():
     Initialize a couple of global variables that will be used during execution.
     '''
     global gc
-    gc = gspread.service_account('credentials.json')
+    gc = gspread.service_account('gspread_credentials.json')
 
     # Open a sheet from a spreadsheet in one go
     global last_tweet
     last_tweet = gc.open("last-tweet-id").sheet1
 
-    consumerKey = 'IODvXnxsaiG8cU7MtY4XZhyLN'
-    consumerSecret = 'R9uqkxEXxQdmYFxFwdOSIqibi17WLqDH45QDAC337uC6lYcRWQ'
+    with open('tweepy_credentials.json') as tweepy_credentials:
+        creds = json.load(tweepy_credentials)
 
-    accessToken = '1478092305361952769-SbteiPfJvqvCxQqzdBy76bycKf8eMd'
-    accessToken_secret = 'lFwfVInbbgJOQ1gmgMmr7U7jHn7ZLygTTcPGrRXJhPg5G'
-
-    global client
-    client = tweepy.Client(consumer_key=consumerKey, consumer_secret=consumerSecret, access_token=accessToken, access_token_secret=accessToken_secret)
+        global client
+        client = tweepy.Client(consumer_key=creds['consumerKey'], consumer_secret=creds['consumerSecret'], access_token=creds['accessToken'], access_token_secret=creds['accessToken_secret'])
 
 def storeId(last_seen_id):
     last_tweet.update('A2', str(last_seen_id))
@@ -37,7 +35,7 @@ def check_errors(request_string):
     Checks the request string for errors, and throws the appropriate error to be handled by the return string.
     '''
     tokens = request_string.split()
-
+    # FIXME: Maybe only have the bot process input after the @sportstatsgenie so users can use the bot in threads
     if(tokens[0] != '@sportstatsgenie'):
         raise exceptions.InvalidAtException
 
@@ -89,7 +87,7 @@ def process_tweet():
             lastId = tweet.id
             storeId(lastId)
             # FIXME: Don't want to be fetching the stats for every tweet, just once each time the function is run
-            tweet_text = return_stats(tweet.text.lower())
+            tweet_text = process_request(tweet.text.lower())
             client.create_tweet(text=tweet_text, in_reply_to_tweet_id=tweet.id)
 
 if __name__ == '__main__':
