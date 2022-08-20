@@ -36,11 +36,15 @@ def check_errors(request_string):
     '''
     tokens = request_string.split()
     # FIXME: Maybe only have the bot process input after the @sportstatsgenie so users can use the bot in threads
-    if(tokens[0] != '@sportstatsgenie'):
+    # Or just don't respond to tweets in this case
+    if tokens[0] != '@sportstatsgenie':
         raise exceptions.InvalidAtException
 
-    if(tokens[1] != 'nba'):
+    if tokens[1] != 'nba':
         raise exceptions.InvalidLeagueException
+
+    if len(tokens) != 6:
+        raise exceptions.InvalidArgumentCountException
 
     # TODO: Would like to be able to determine whether the user requested a valid player but that's gonna be tough
 
@@ -75,13 +79,15 @@ def process_request(request_string):
     except exceptions.InvalidAtException:
         return 'ERROR - Unfortunately I could not process your request. Your tweet must begin with @sportstatsgenie'
     except exceptions.InvalidLeagueException:
-        return f'ERROR - I could not process your request. Please request a valid sport. Currently supported sport: NBA'
+        return 'ERROR - I could not process your request. Please request a valid sport. Currently supported sport: NBA'
+    except exceptions.InvalidArgumentCountException:
+        return 'ERROR - I could not process your request. Incorrect number of arguments, I need 6 arguments to make a valid query (@sportstatsgenie, league, first_name, last_name, season, stat'
     except:
         return "ERROR - I could not process your request. Unknown exception occurred"
 
     return return_stats(request_string)
 
-def process_tweet():
+def process_tweets():
     lastId = retrieveId()
     response = client.get_users_mentions(id=1478092305361952769, since_id=lastId, expansions=['author_id'], user_auth=True)
     tweets = response.data
@@ -90,8 +96,9 @@ def process_tweet():
             lastId = tweet.id
             storeId(lastId)
             # FIXME: Don't want to be fetching the stats for every tweet, just once each time the function is run
-            tweet_text = process_request(tweet.text.lower())
+            tweet_text = process_request(tweet.text)
             client.create_tweet(text=tweet_text, in_reply_to_tweet_id=tweet.id)
 
 if __name__ == '__main__':
-    print(process_request(sys.argv[1]))
+    setup()
+    process_tweets()
