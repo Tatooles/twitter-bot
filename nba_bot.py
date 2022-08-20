@@ -36,7 +36,7 @@ def check_errors(request_string):
     '''
     tokens = request_string.split()
     # FIXME: Maybe only have the bot process input after the @sportstatsgenie so users can use the bot in threads
-    # Or just don't respond to tweets in this case
+    # For now just don't respond to tweets in this case
     if tokens[0] != '@sportstatsgenie':
         raise exceptions.InvalidAtException
 
@@ -77,7 +77,7 @@ def process_request(request_string):
     try:
         check_errors(request_string)
     except exceptions.InvalidAtException:
-        return 'ERROR - Unfortunately I could not process your request. Your tweet must begin with @sportstatsgenie'
+        return
     except exceptions.InvalidLeagueException:
         return 'ERROR - I could not process your request. Please request a valid sport. Currently supported sport: NBA'
     except exceptions.InvalidArgumentCountException:
@@ -97,7 +97,8 @@ def process_tweets():
             storeId(lastId)
             # FIXME: Don't want to be fetching the stats for every tweet, just once each time the function is run
             tweet_text = process_request(tweet.text)
-            client.create_tweet(text=tweet_text, in_reply_to_tweet_id=tweet.id)
+            if tweet_text:
+                client.create_tweet(text=tweet_text, in_reply_to_tweet_id=tweet.id)
 
 if __name__ == '__main__':
     setup()
