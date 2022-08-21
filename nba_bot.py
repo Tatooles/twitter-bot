@@ -46,13 +46,15 @@ def check_tweet(request_string):
     if len(tokens) != 6:
         raise exceptions.InvalidArgumentCountException
 
-    # FIXME: Fixme, slow operations, only want to execute once rather than for each tweet
+    # FIXME: Slow operations, only want to execute once rather than for each tweet
     nba_stats = gc.open("nba-stats").sheet1
     df = pd.DataFrame(nba_stats.get_all_records())
+    name = f"{tokens[2]} {tokens[3]}"
+    player = df[(df['player_name'] == name)]
+    if player.empty:
+        raise exceptions.PlayerNotFoundException
+        
     try:
-        name = f"{tokens[2]} {tokens[3]}"
-        # FIXME: Can probably have a special try here to validate the player name
-        player = df[(df['player_name'] == name)]
         if tokens[4] == 'career':
             stat = player[[tokens[5]]].mean().values[0]
             stat = round(stat, 1)
@@ -86,6 +88,8 @@ def process_request(request_string):
         return "ERROR - I could not process your request. Incorrect number of arguments, I need 6 arguments to make a valid query (@sportstatsgenie, league, first_name, last_name, season, stat)"
     except exceptions.InvalidQueryException:
         return "ERROR - I could not process your request. Couldn\'t complete a valid query with the information you provided"
+    except exceptions.PlayerNotFoundException:
+        return "ERROR - I could not process your request. The player you requested could not be found"
     except:
         return "ERROR - I could not process your request. Unknown exception occurred"
 

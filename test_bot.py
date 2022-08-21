@@ -33,14 +33,16 @@ class TestCalc(unittest.TestCase):
         result2 = nba_bot.process_request('@sportstatsgenie NFL Zach LaVine 2020-21 PTS')
         result3 = nba_bot.process_request('@sportstatsgenie NBA Zach 2020-21 PTS')
         result4 = nba_bot.process_request('@sportstatsgenie NBA Zach LaVine 2020 2022 PTS')
+        result5 = nba_bot.process_request('@sportstatsgenie NBA Bill Russell 2020-21 PTS')
 
         self.assertEqual(result1, None)
         self.assertEqual(result2, 'ERROR - I could not process your request. Please request a valid sport. Currently supported sport: NBA')
         self.assertEqual(result3, 'ERROR - I could not process your request. Incorrect number of arguments, I need 6 arguments to make a valid query (@sportstatsgenie, league, first_name, last_name, season, stat)')
         self.assertEqual(result4, 'ERROR - I could not process your request. Incorrect number of arguments, I need 6 arguments to make a valid query (@sportstatsgenie, league, first_name, last_name, season, stat)')
+        self.assertEqual(result5, "ERROR - I could not process your request. The player you requested could not be found")
         
     def test_invalid_query(self):
-        result1 = nba_bot.process_request('@sportstatsgenie NBA Jim Jameson 2020-21 PTS')
+        result1 = nba_bot.process_request('@sportstatsgenie NBA Michael Jordan 1960-61 PTS')
         result2 = nba_bot.process_request('@sportstatsgenie NBA Zach LaVine 2020-21 blks')
 
         self.assertEqual(result1, 'ERROR - I could not process your request. Couldn\'t complete a valid query with the information you provided')

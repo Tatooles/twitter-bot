@@ -26,3 +26,8 @@ class InvalidQueryException(NBABotException):
     '''
     When we encounter an error attempting to query the user's data via pandas
     '''
+
+class PlayerNotFoundException(NBABotException):
+    '''
+    When the user request data for a player not found in the database
+    '''
