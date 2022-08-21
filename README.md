@@ -11,5 +11,7 @@ TODO
 
 ## Future Features
 Career NBA stats
+
 Compare feature to compare the stats of two players
+
 Support for MLB and NFL stats
