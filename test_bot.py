@@ -18,11 +18,15 @@ class TestCalc(unittest.TestCase):
         result2 = nba_bot.process_request('@sportstatsgenie NBA Michael Jordan 1997-98 PTS')
         result3 = nba_bot.process_request('@sportstatsgenie nba kyle korver 2005-06 fg3_pct')
         result4 = nba_bot.process_request('@SPORTSTATSGENIE NBA J.R. REID 1997-98 PLUS_MINUS')
+        result5 = nba_bot.process_request('@sportstatsgenie nba james harden career pts')
+        result6 = nba_bot.process_request("@sportstatsgenie nba shaquille o'neal career reb")
         
         self.assertEqual(result1, 'Zach Lavine averaged 27.4 pts in the 2020-21 season')
         self.assertEqual(result2, 'Michael Jordan averaged 28.7 pts in the 1997-98 season')
         self.assertEqual(result3, 'Kyle Korver averaged 0.42 fg3_pct in the 2005-06 season')
         self.assertEqual(result4, 'J.r. Reid averaged 0.3 plus_minus in the 1997-98 season')
+        self.assertEqual(result5, 'James Harden averaged 24.9 pts for his career')
+        self.assertEqual(result6, "Shaquille O'neal averaged 10.0 reb for his career")
 
     def test_errors(self):
         result1 = nba_bot.process_request('@randomat NBA Zach LaVine 2020-21 PTS')

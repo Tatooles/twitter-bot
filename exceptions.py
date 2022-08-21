@@ -21,3 +21,8 @@ class InvalidArgumentCountException(NBABotException):
     '''
     When the user's request does not have the correct number of arguments to make a valid query
     '''
+
+class InvalidQueryException(NBABotException):
+    '''
+    When we encounter an error attempting to query the user's data via pandas
+    '''

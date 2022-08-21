@@ -30,7 +30,7 @@ def storeId(last_seen_id):
 def retrieveId():
     return int(last_tweet.acell('A2').value)
 
-def check_errors(request_string):
+def check_tweet(request_string):
     '''
     Checks the request string for errors, and throws the appropriate error to be handled by the return string.
     '''
@@ -46,22 +46,24 @@ def check_errors(request_string):
     if len(tokens) != 6:
         raise exceptions.InvalidArgumentCountException
 
-    # TODO: Would like to be able to determine whether the user requested a valid player but that's gonna be tough
-
-def return_stats(valid_string):
-    '''
-    Takes in a valid request string and returns the stats the user requested.
-    '''
-    tokens = valid_string.split()
+    # FIXME: Fixme, slow operations, only want to execute once rather than for each tweet
     nba_stats = gc.open("nba-stats").sheet1
     df = pd.DataFrame(nba_stats.get_all_records())
     try:
-        name = f'{tokens[2]} {tokens[3]}'
-        season = df[(df['player_name'] == name) & (df['season_id'] == tokens[4])]
-        stat = season.iloc[0][tokens[5]]
+        name = f"{tokens[2]} {tokens[3]}"
+        # FIXME: Can probably have a special try here to validate the player name
+        player = df[(df['player_name'] == name)]
+        if tokens[4] == 'career':
+            stat = player[[tokens[5]]].mean().values[0]
+            stat = round(stat, 1)
+            return f"{tokens[2].capitalize()} {tokens[3].capitalize()} averaged {stat} {tokens[5]} for his career"
+        else:
+            season = player[player['season_id'] == tokens[4]]
+            stat = season.iloc[0][tokens[5]]
+            return f"{tokens[2].capitalize()} {tokens[3].capitalize()} averaged {stat} {tokens[5]} in the {tokens[4]} season"
     except:
-        return 'ERROR - I could not process your request. Couldn\'t complete a valid query with the information you provided'
-    return f'{tokens[2].capitalize()} {tokens[3].capitalize()} averaged {stat} {tokens[5]} in the {tokens[4]} season'
+        raise exceptions.InvalidQueryException
+
 
 def process_request(request_string):
     '''
@@ -75,17 +77,17 @@ def process_request(request_string):
     '''
     request_string = request_string.lower()
     try:
-        check_errors(request_string)
+        return check_tweet(request_string)
     except exceptions.InvalidAtException:
         return
     except exceptions.InvalidLeagueException:
-        return 'ERROR - I could not process your request. Please request a valid sport. Currently supported sport: NBA'
+        return "ERROR - I could not process your request. Please request a valid sport. Currently supported sport: NBA"
     except exceptions.InvalidArgumentCountException:
-        return 'ERROR - I could not process your request. Incorrect number of arguments, I need 6 arguments to make a valid query (@sportstatsgenie, league, first_name, last_name, season, stat)'
+        return "ERROR - I could not process your request. Incorrect number of arguments, I need 6 arguments to make a valid query (@sportstatsgenie, league, first_name, last_name, season, stat)"
+    except exceptions.InvalidQueryException:
+        return "ERROR - I could not process your request. Couldn\'t complete a valid query with the information you provided"
     except:
         return "ERROR - I could not process your request. Unknown exception occurred"
-
-    return return_stats(request_string)
 
 def process_tweets():
     lastId = retrieveId()
@@ -95,7 +97,6 @@ def process_tweets():
         for tweet in reversed(tweets):
             lastId = tweet.id
             storeId(lastId)
-            # FIXME: Don't want to be fetching the stats for every tweet, just once each time the function is run
             tweet_text = process_request(tweet.text)
             if tweet_text:
                 client.create_tweet(text=tweet_text, in_reply_to_tweet_id=tweet.id)
