@@ -31,3 +31,8 @@ class PlayerNotFoundException(NBABotException):
     '''
     When the user request data for a player not found in the database
     '''
+
+class InvalidSeasonException(NBABotException):
+    '''
+    When the user requests stats from a season that is unsupported
+    '''

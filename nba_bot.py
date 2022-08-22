@@ -61,8 +61,13 @@ def check_tweet(request_string):
             return f"{tokens[2].capitalize()} {tokens[3].capitalize()} averaged {stat} {tokens[5]} for his career"
         else:
             season = player[player['season_id'] == tokens[4]]
+            # FIXME: This ocurrs if the season is invalid or the player didn't play in that season, probably want to check season manually against the list
+            if season.empty:
+                raise exceptions.InvalidSeasonException
             stat = season.iloc[0][tokens[5]]
             return f"{tokens[2].capitalize()} {tokens[3].capitalize()} averaged {stat} {tokens[5]} in the {tokens[4]} season"
+    except exceptions.InvalidSeasonException:
+        raise exceptions.InvalidSeasonException
     except:
         raise exceptions.InvalidQueryException
 
@@ -83,13 +88,15 @@ def process_request(request_string):
     except exceptions.InvalidAtException:
         return
     except exceptions.InvalidLeagueException:
-        return "ERROR - I could not process your request. Please request a valid sport. Currently supported sport: NBA"
+        return "ERROR - I could not process your request. Invalid sport, currently supported sport: NBA"
     except exceptions.InvalidArgumentCountException:
         return "ERROR - I could not process your request. Incorrect number of arguments, I need 6 arguments to make a valid query (@sportstatsgenie, league, first_name, last_name, season, stat)"
-    except exceptions.InvalidQueryException:
-        return "ERROR - I could not process your request. Couldn\'t complete a valid query with the information you provided"
     except exceptions.PlayerNotFoundException:
         return "ERROR - I could not process your request. The player you requested could not be found"
+    except exceptions.InvalidSeasonException:
+        return 'ERROR - I could not process your request. Invalid season, I can only provide NBA stats from 1996-present'
+    except exceptions.InvalidQueryException:
+        return "ERROR - I could not process your request. Couldn\'t complete a valid query with the information you provided"
     except:
         return "ERROR - I could not process your request. Unknown exception occurred"
 
