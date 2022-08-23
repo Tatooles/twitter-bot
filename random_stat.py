@@ -10,11 +10,9 @@ def find_stat():
     df = pd.DataFrame(nba_stats.get_all_records())
 
     # Get random row
-    row = random.randint(0, len(df.index))
-    
-    # TODO: Now figure out what stat to print
-    # Choose a totally random stat or a random relevant one?
-    # Or tweet out the player's whole statline?
+    row = df.iloc[random.randint(0, len(df.index))]
+
+    return f'{row["player_name"].title()} averaged {row["pts"]} PPG, {row["ast"]} APG, and {row["reb"]} RPG, on {row["fg_pct"]}, {row["fg3_pct"]}, {row["ft_pct"]} shooting splits in the {row["season_id"]} season.'
 
 def send_tweet(tweet_text):
     with open('tweepy_credentials.json') as tweepy_credentials:
@@ -23,4 +21,4 @@ def send_tweet(tweet_text):
         client.create_tweet(text=tweet_text)
 
 if __name__ == '__main__':
-    find_stat()
+        send_tweet(find_stat())
