@@ -46,6 +46,37 @@ def check_tweet(request_string):
     if len(tokens) != 6:
         raise exceptions.InvalidArgumentCountException
 
+    seasons = [
+        '1996-97',
+        '1997-98',
+        '1998-99',
+        '1999-00',
+        '2000-01',
+        '2001-02',
+        '2002-03',
+        '2003-04',
+        '2004-05',
+        '2005-06',
+        '2006-07',
+        '2007-08',
+        '2008-09',
+        '2009-10',
+        '2010-11',
+        '2011-12',
+        '2012-13',
+        '2013-14',
+        '2014-15',
+        '2015-16',
+        '2016-17',
+        '2017-18',
+        '2018-19',
+        '2019-20',
+        '2020-21',
+        '2021-22'
+    ]
+    if tokens[4] not in seasons and tokens[4] != 'career':
+        raise exceptions.SeasonOutOfRangeException
+
     # FIXME: Slow operations, only want to execute once rather than for each tweet
     nba_stats = gc.open("nba-stats").sheet1
     df = pd.DataFrame(nba_stats.get_all_records())
@@ -58,14 +89,14 @@ def check_tweet(request_string):
         if tokens[4] == 'career':
             stat = player[[tokens[5]]].mean().values[0]
             stat = round(stat, 1)
-            return f"{tokens[2].capitalize()} {tokens[3].capitalize()} averaged {stat} {tokens[5]} for his career"
+            return f"{name.title()} averaged {stat} {tokens[5]} for his career"
         else:
             season = player[player['season_id'] == tokens[4]]
             # FIXME: This ocurrs if the season is invalid or the player didn't play in that season, probably want to check season manually against the list
             if season.empty:
                 raise exceptions.InvalidSeasonException
             stat = season.iloc[0][tokens[5]]
-            return f"{tokens[2].capitalize()} {tokens[3].capitalize()} averaged {stat} {tokens[5]} in the {tokens[4]} season"
+            return f"{name.title()} averaged {stat} {tokens[5]} in the {tokens[4]} season"
     except exceptions.InvalidSeasonException:
         raise exceptions.InvalidSeasonException
     except:
@@ -93,8 +124,10 @@ def process_request(request_string):
         return "ERROR - I could not process your request. Incorrect number of arguments, I need 6 arguments to make a valid query (@sportstatsgenie, league, first_name, last_name, season, stat)"
     except exceptions.PlayerNotFoundException:
         return "ERROR - I could not process your request. The player you requested could not be found"
+    except exceptions.SeasonOutOfRangeException:
+        return 'ERROR - I could not process your request. Season is out of range. I can only provide NBA stats from 1996-present'
     except exceptions.InvalidSeasonException:
-        return 'ERROR - I could not process your request. Invalid season, I can only provide NBA stats from 1996-present'
+        return 'ERROR - I could not process your request. The player you requested did not play in that season'
     except exceptions.InvalidQueryException:
         return "ERROR - I could not process your request. Couldn\'t complete a valid query with the information you provided"
     except:
