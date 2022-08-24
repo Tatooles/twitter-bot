@@ -17,7 +17,7 @@ class InvalidLeagueException(NBABotException):
     When the bot is not able to parse a valid league from the user's input
     '''
 
-class InvalidArgumentCountException(NBABotException):
+class NotEnoughArgumentsException(NBABotException):
     '''
     When the user's request does not have the correct number of arguments to make a valid query
     '''
@@ -34,10 +34,15 @@ class PlayerNotFoundException(NBABotException):
 
 class InvalidSeasonException(NBABotException):
     '''
-    When the user requests stats from a season that the player did not play in
+    When the user requests stats from a season that is unsupported
     '''
 
 class SeasonOutOfRangeException(NBABotException):
     '''
-    When the user requests stats from a season that is unsupported
+    When the user requests stats from a season that the player did not play in
+    '''
+
+class InvalidStatException(NBABotException):
+    '''
+    When the user request an invalid stat
     '''

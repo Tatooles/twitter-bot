@@ -10,6 +10,8 @@ TODO
 TODO
 
 ## Future Features
+Only process input after @sportstatsgenie so the bot can be used in threads
+
 Compare feature to compare the stats of two players
 
 Support for MLB and NFL stats
