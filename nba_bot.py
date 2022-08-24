@@ -1,11 +1,12 @@
 # TODO: Add file comment
 
-import sys
 import json
 import pandas as pd
 import tweepy
 import gspread
 import exceptions
+
+df = None
 
 def setup():
     '''
@@ -77,9 +78,12 @@ def check_tweet(request_string):
     if tokens[4] not in seasons and tokens[4] != 'career':
         raise exceptions.SeasonOutOfRangeException
 
-    # FIXME: Slow operations, only want to execute once rather than for each tweet
-    nba_stats = gc.open("nba-stats").sheet1
-    df = pd.DataFrame(nba_stats.get_all_records())
+    # Slow operations, only want to process once for each execution
+    global df
+    if df is None:
+        nba_stats = gc.open("nba-stats").sheet1
+        df = pd.DataFrame(nba_stats.get_all_records())
+
     name = f"{tokens[2]} {tokens[3]}"
     player = df[(df['player_name'] == name)]
     if player.empty:
@@ -87,12 +91,12 @@ def check_tweet(request_string):
         
     try:
         if tokens[4] == 'career':
+            # Take the mean of the colunm of the given stat for this player
             stat = player[[tokens[5]]].mean().values[0]
             stat = round(stat, 1)
             return f"{name.title()} averaged {stat} {tokens[5]} for his career"
         else:
             season = player[player['season_id'] == tokens[4]]
-            # FIXME: This ocurrs if the season is invalid or the player didn't play in that season, probably want to check season manually against the list
             if season.empty:
                 raise exceptions.InvalidSeasonException
             stat = season.iloc[0][tokens[5]]
