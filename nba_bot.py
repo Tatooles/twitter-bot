@@ -1,5 +1,11 @@
-# TODO: Add file comment
+'''
+nba_bot
+~~~~~~~~~~
+This file searches for recent mentions of this bot and responds with the stats the Twitter user requested.
 
+@Author: Kevin Tatooles
+@Credit: https://www.youtube.com/watch?v=W0wWwglE1Vc for logic on replying to recent Twitter mentions.
+'''
 import json
 import pandas as pd
 import tweepy
@@ -34,6 +40,8 @@ def retrieveId():
 def check_tweet(request_string):
     '''
     Checks the request string for errors, and throws the appropriate error to be handled by the return string.
+    
+    Then fetches all NBA data and parses for the data requested by the user via pandas
     '''
     tokens = request_string.split()
 
@@ -52,115 +60,36 @@ def check_tweet(request_string):
         career = True
 
     seasons = [
-        '1996-97',
-        '1997-98',
-        '1998-99',
-        '1999-00',
-        '2000-01',
-        '2001-02',
-        '2002-03',
-        '2003-04',
-        '2004-05',
-        '2005-06',
-        '2006-07',
-        '2007-08',
-        '2008-09',
-        '2009-10',
-        '2010-11',
-        '2011-12',
-        '2012-13',
-        '2013-14',
-        '2014-15',
-        '2015-16',
-        '2016-17',
-        '2017-18',
-        '2018-19',
-        '2019-20',
-        '2020-21',
-        '2021-22'
+        '1996-97', '1997-98', '1998-99', '1999-00', '2000-01', '2001-02',
+        '2002-03', '2003-04', '2004-05', '2005-06', '2006-07', '2007-08',
+        '2008-09', '2009-10', '2010-11', '2011-12', '2012-13', '2013-14',
+        '2014-15', '2015-16', '2016-17', '2017-18', '2018-19', '2019-20',
+        '2020-21', '2021-22'
     ]
     if tokens[4] not in seasons and not career:
         raise exceptions.InvalidSeasonException
 
 
     column_names = [
-        'player_id',
-        'player_name',
-        'nickname',
-        'team_id',
-        'team_abbreviation',
-        'age',
-        'gp', 
-        'w',
-        'l',
-        'w_pct',
-        'min',
-        'fgm',
-        'fga',
-        'fg_pct',
-        'fg3m',
-        'fg3a',
-        'fg3_pct',
-        'ftm',
-        'fta',
-        'ft_pct',
-        'oreb',
-        'dreb',
-        'reb',
-        'ast',
-        'tov',
-        'stl',
-        'blk',
-        'blka',
-        'pf',
-        'pfd',
-        'pts', 
-        'plus_minus',
-        'nba_fantasy_pts', 
-        'dd2',
-        'td3', 
-        'wnba_fantasy_pts', 
-        'gp_rank',
-        'w_rank',
-        'l_rank', 
-        'w_pct_rank',
-        'min_rank',
-        'fgm_rank',
-        'fga_rank',
-        'fg_pct_rank',
-        'fg3m_rank', 
-        'fg3a_rank',
-        'fg3_pct_rank',
-        'ftm_rank',
-        'fta_rank',
-        'ft_pct_rank', 
-        'oreb_rank',
-        'dreb_rank',
-        'reb_rank', 
-        'ast_rank',
-        'tov_rank',
-        'stl_rank',
-        'blk_rank',
-        'blka_rank',
-        'pf_rank',
-        'pfd_rank', 
-        'pts_rank',
-        'plus_minus_rank', 
-        'nba_fantasy_pts_rank',
-        'dd2_rank',
-        'td3_rank',
-        'wnba_fantasy_pts_rank',
-        'cfid', 
-        'cfparams'
+        'player_id', 'player_name', 'nickname', 'team_id', 'team_abbreviation',
+        'age', 'gp',  'w', 'l', 'w_pct', 'min', 'fgm', 'fga', 'fg_pct', 'fg3m',
+        'fg3a', 'fg3_pct', 'ftm', 'fta', 'ft_pct', 'oreb', 'dreb', 'reb', 'ast',
+        'tov', 'stl', 'blk', 'blka', 'pf', 'pfd', 'pts',  'plus_minus',
+        'nba_fantasy_pts',  'dd2', 'td3', 'wnba_fantasy_pts', 'gp_rank', 'w_rank',
+        'l_rank',  'w_pct_rank', 'min_rank', 'fgm_rank', 'fga_rank', 'fg_pct_rank',
+        'fg3m_rank', 'fg3a_rank', 'fg3_pct_rank', 'ftm_rank', 'fta_rank', 'ft_pct_rank', 
+        'oreb_rank', 'dreb_rank', 'reb_rank', 'ast_rank', 'tov_rank', 'stl_rank',
+        'blk_rank', 'blka_rank', 'pf_rank', 'pfd_rank', 'pts_rank', 'plus_minus_rank', 
+        'nba_fantasy_pts_rank', 'dd2_rank', 'td3_rank', 'wnba_fantasy_pts_rank',
+        'cfid', 'cfparams'
     ]
-
     # Now the rest of the arguments are stats
     stat_labels = tokens[5:]
     for stat in stat_labels:
         if stat not in column_names:
             raise exceptions.InvalidStatException
 
-    # Slow operations, only want to process once for each execution
+    # Slow operations, only want to process once for each execution, and after faster error checks
     global df
     if df is None:
         nba_stats = gc.open("nba-stats").sheet1
@@ -171,37 +100,34 @@ def check_tweet(request_string):
     if player.empty:
         raise exceptions.PlayerNotFoundException
         
-    try:
-        if not career:
-            season = player[player['season_id'] == tokens[4]]
-            if season.empty:
-                raise exceptions.SeasonOutOfRangeException
-        stat_values = []
-        for stat_label in stat_labels:
-            if career:
-                stat = player[[stat_label]].mean().values[0]
-                stat = round(stat, 1)
-                stat_values.append(f'{stat} {stat_label}')
-            else:
-                stat_values.append(f'{season.iloc[0][stat_label]} {stat_label}')
+    if not career:
+        season = player[player['season_id'] == tokens[4]]
+        if season.empty:
+            raise exceptions.SeasonOutOfRangeException
 
-        # Want to convert list into a string with oxford comma
-        # Ref: https://stackoverflow.com/a/53981846/
-        if len(stat_values) < 3:
-            stat_str = ' and '.join(stat_values)
-        else:
-            stat_str = ', '.join(stat_values[:-1]) + ', and ' + stat_values[-1]
-
+    # Find and fill stat data
+    stat_values = []
+    for stat_label in stat_labels:
         if career:
-            string_end = 'for his career'
+            stat = player[[stat_label]].mean().values[0]
+            stat = round(stat, 1)
+            stat_values.append(f'{stat} {stat_label}')
         else:
-            string_end = f'in the {tokens[4]} season'
+            stat_values.append(f'{season.iloc[0][stat_label]} {stat_label}')
 
-        return f"{name.title()} averaged {stat_str} {string_end}"
-    except exceptions.SeasonOutOfRangeException:
-        raise exceptions.SeasonOutOfRangeException
-    except:
-        raise exceptions.InvalidQueryException
+    # Want to convert list into a string with oxford comma
+    # Ref: https://stackoverflow.com/a/53981846/
+    if len(stat_values) < 3:
+        stat_str = ' and '.join(stat_values)
+    else:
+        stat_str = ', '.join(stat_values[:-1]) + ', and ' + stat_values[-1]
+
+    if career:
+        string_end = 'for his career'
+    else:
+        string_end = f'in the {tokens[4]} season'
+
+    return f"{name.title()} averaged {stat_str} {string_end}"
 
 
 def process_request(request_string):
@@ -238,6 +164,10 @@ def process_request(request_string):
         return "ERROR - I could not process your request. Unknown exception occurred"
 
 def process_tweets():
+    '''
+    Finds the last Tweet this bot replied to, then fetches all mentions to the bot since that tweet, then stores the new last read tweet
+    Then process each tweet and respond accordingly
+    '''
     lastId = retrieveId()
     response = client.get_users_mentions(id=1478092305361952769, since_id=lastId, expansions=['author_id'], user_auth=True)
     tweets = response.data
