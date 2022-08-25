@@ -12,7 +12,7 @@ def find_stat():
     # Get random row
     row = df.iloc[random.randint(0, len(df.index))]
 
-    return f'{row["player_name"].title()} averaged {row["pts"]} PPG, {row["ast"]} APG, and {row["reb"]} RPG, on {row["fg_pct"]}, {row["fg3_pct"]}, {row["ft_pct"]} shooting splits in the {row["season_id"]} season.'
+    return f'Random stat of the day: {row["player_name"].title()} averaged {row["pts"]} PPG, {row["reb"]} RPG, and {row["ast"]} APG, on {row["fg_pct"]}, {row["fg3_pct"]}, {row["ft_pct"]} shooting splits in the {row["season_id"]} season.'
 
 def send_tweet(tweet_text):
     with open('tweepy_credentials.json') as tweepy_credentials:
