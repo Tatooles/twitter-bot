@@ -26,7 +26,11 @@ team_abbreviation, age, gp, w_pct, min, fg_pct, fg3_pct, ft_pct reb, ast, tov, s
 
 
 ## Examples
-TODO
+<img src="img/IMG_0871.jpeg" alt="Hey bot @sportstatsgenie nba Lebron James career pts reb ast fg_pct -> Lebron James averaged 27.1 pts, 7.5 reb, 7.4 ast, and 0.5 fg_pct for his career" width="300" />
+
+<img src="img/IMG_0869.jpeg" alt="@sportstatsgenie nba giannis antetokounmpo 2020-21 plus_minus -> Giannis Antetokounmpo averaged 6.7 plus_minus for the 2020-21 season" width="300" />
+
+<img src="img/IMG_0866.jpeg" alt="@sportstatsgenie nba Michael Jordan 1996-97 pts -> Michael Jordan averaged 29.6 pts in the 1996-97 season" width="300" />
 
 ## Future Features
 Ability to compare the stats of two players
