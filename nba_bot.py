@@ -45,10 +45,11 @@ def check_tweet(request_string):
     '''
     tokens = request_string.split()
 
-    # Don't respond to tweets that don't start with the @
-    if tokens[0] != '@sportstatsgenie':
-        raise exceptions.InvalidAtException
+    # Only handle text after the @
+    atIndex = tokens.index('@sportstatsgenie')
+    tokens = tokens[atIndex:]
 
+    # Ignore this case, leage after the @ will signal that user actually wants to invoke the bot
     if tokens[1] != 'nba':
         raise exceptions.InvalidLeagueException
 
@@ -144,10 +145,8 @@ def process_request(request_string):
 
     try:
         return check_tweet(request_string)
-    except exceptions.InvalidAtException:
-        return
     except exceptions.InvalidLeagueException:
-        return "ERROR - I could not process your request. Invalid sport, currently supported sport: NBA"
+        return
     except exceptions.NotEnoughArgumentsException:
         return "ERROR - I could not process your request. Not enough arguments, I need 6 at least arguments to make a valid query (@sportstatsgenie, league, first_name, last_name, season, stat)"
     except exceptions.PlayerNotFoundException:

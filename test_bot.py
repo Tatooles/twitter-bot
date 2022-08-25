@@ -14,9 +14,9 @@ class TestCalc(unittest.TestCase):
         nba_bot.setup()
 
     def test_return_stats(self):
-        result1 = nba_bot.process_request('@sportstatsgenie NBA Zach LaVine 2020-21 PTS')
-        result2 = nba_bot.process_request('@sportstatsgenie NBA Michael Jordan 1997-98 PTS')
-        result3 = nba_bot.process_request('@sportstatsgenie nba kyle korver 2005-06 fg3_pct')
+        result1 = nba_bot.process_request('any random text @sportstatsgenie NBA Zach LaVine 2020-21 PTS')
+        result2 = nba_bot.process_request('some thing @sportstatsgenie NBA Michael Jordan 1997-98 PTS')
+        result3 = nba_bot.process_request("@anyone else's name, say something random @sportstatsgenie nba kyle korver 2005-06 fg3_pct")
         result4 = nba_bot.process_request('@SPORTSTATSGENIE NBA J.R. REID 1997-98 PLUS_MINUS')
         
         self.assertEqual(result1, 'Zach Lavine averaged 27.4 pts in the 2020-21 season')
@@ -42,23 +42,21 @@ class TestCalc(unittest.TestCase):
 
 
     def test_errors(self):
-        result1 = nba_bot.process_request('@randomat NBA Zach LaVine 2020-21 PTS')
+        result1 = nba_bot.process_request('@sportstatsgenie NBA Zach LaVine 2001-02 points rebounds assists')
         result2 = nba_bot.process_request('@sportstatsgenie NFL Zach LaVine 2020-21 PTS')
         result3 = nba_bot.process_request('@sportstatsgenie NBA Zach 2020-21 PTS')
         result4 = nba_bot.process_request('@sportstatsgenie NBA Zach LaVine 2020 2022 PTS')
         result5 = nba_bot.process_request('@sportstatsgenie NBA Bill Russell 2020-21 PTS')
         result6 = nba_bot.process_request('@sportstatsgenie NBA Michael Jordan 1988-89 PTS')
         result7 = nba_bot.process_request('@sportstatsgenie NBA Zach LaVine 2001-02 PTS')
-        result8 = nba_bot.process_request('@sportstatsgenie NBA Zach LaVine 2001-02 points rebounds assists')
 
-        self.assertEqual(result1, None)
-        self.assertEqual(result2, 'ERROR - I could not process your request. Invalid sport, currently supported sport: NBA')
+        self.assertEqual(result1, 'ERROR - I could not process you request. You requested a stat that I do not support. See pinned tweet thread for supported stats')
+        self.assertEqual(result2, None)
         self.assertEqual(result3, 'ERROR - I could not process your request. Not enough arguments, I need 6 at least arguments to make a valid query (@sportstatsgenie, league, first_name, last_name, season, stat)')
         self.assertEqual(result4, 'ERROR - I could not process your request. The season you provided is invalid. I can provide NBA stats from 1996-97 to 2021-22')
         self.assertEqual(result5, "ERROR - I could not process your request. The player you requested could not be found")
         self.assertEqual(result6, 'ERROR - I could not process your request. The season you provided is invalid. I can provide NBA stats from 1996-97 to 2021-22')
         self.assertEqual(result7, 'ERROR - I could not process your request. The player you requested did not play in that season')
-        self.assertEqual(result8, 'ERROR - I could not process you request. You requested a stat that I do not support. See pinned tweet thread for supported stats')
 
 
 if __name__ == '__main__':
