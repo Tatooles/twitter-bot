@@ -33,6 +33,8 @@ team_abbreviation, age, gp, w_pct, min, fg_pct, fg3_pct, ft_pct reb, ast, tov, s
 <img src="img/IMG_0866.jpeg" alt="@sportstatsgenie nba Michael Jordan 1996-97 pts -> Michael Jordan averaged 29.6 pts in the 1996-97 season" width="300" />
 
 ## Future Features
+Default values for if the user excludes season or stats
+
 Ability to compare the stats of two players
 
 Support for MLB and NFL stats
