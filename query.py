@@ -16,19 +16,23 @@ with open('railway_credentials.json') as credentials:
         port=creds['port']
     )
 
-gc = gspread.service_account('gspread_credentials.json')
-nba_stats = gc.open("nba-stats").sheet1
-df = pd.DataFrame(nba_stats.get_all_records())
+# gc = gspread.service_account('gspread_credentials.json')
+# nba_stats = gc.open("nba-stats").sheet1
+# df = pd.DataFrame(nba_stats.get_all_records())
 
 t0 = time.time()
 cursor = mydb.cursor()
+
+# total = len(df.index)
+# count = 1
 
 # for i,row in df.iterrows():
 #     sql = "insert into nbastats values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"
 #     val = tuple(row)
 #     cursor.execute(sql, val)
 #     mydb.commit()
-#     print("record inserted")
+#     print(f"Inserted record {count} of {total}")
+#     count += 1
 
 '''
 This code creates the table
@@ -41,13 +45,15 @@ cursor.execute(sql, val)
 mydb.commit()
 '''
 
-# cursor.execute("CREATE TABLE nbastats (player_id INT, player_name VARCHAR(255), nickname VARCHAR(255), team_id VARCHAR(255), team_abbreviation VARCHAR(3), age INT, gp INT, w INT, l INT, w_pct DECIMAL, min DECIMAL, fgm DECIMAL, fga DECIMAL, fg_pct DECIMAL, fg3m DECIMAL, fg3a DECIMAL, fg3_pct DECIMAL, ftm DECIMAL, fta DECIMAL, ft_pct DECIMAL, oreb DECIMAL, dreb DECIMAL, reb DECIMAL, ast DECIMAL, tov DECIMAL, stl DECIMAL, blk DECIMAL, blka DECIMAL, pf DECIMAL, pfd DECIMAL, pts DECIMAL, plus_minus DECIMAL, nba_fantasy_pts DECIMAL, dd2 INT, td3 INT, wnba_fantasy_pts DECIMAL, gp_rank INT, w_rank INT, l_rank INT, w_pct_rank INT, min_rank INT, fgm_rank INT, fga_rank INT, fg_pct_rank INT, fg3m_rank INT, fg3a_rank INT, fg3_pct_rank INT, ftm_rank INT, fta_rank INT, ft_pct_rank INT, oreb_rank INT, dreb_rank INT, reb_rank INT, ast_rank INT, tov_rank INT, stl_rank INT, blk_rank INT, blka_rank INT, pf_rank INT, pfd_rank INT, pts_rank INT, plus_minus_rank INT, nba_fantasy_pts_rank INT, dd2_rank INT, td3_rank INT, wnba_fantasy_pts_rank INT, cfid INT, cfparams VARCHAR(255), season_id VARCHAR(255));")
+# cursor.execute("CREATE TABLE nbastats (player_id INT, player_name VARCHAR(255), nickname VARCHAR(255), team_id VARCHAR(255), team_abbreviation VARCHAR(3), age INT, gp INT, w INT, l INT, w_pct DECIMAL(4,3), min DECIMAL(3,1), fgm DECIMAL(3,1), fga DECIMAL(3,1), fg_pct DECIMAL(4,3), fg3m DECIMAL(3,1), fg3a DECIMAL(3,1), fg3_pct DECIMAL(4,3), ftm DECIMAL(3,1), fta DECIMAL(3,1), ft_pct DECIMAL(4,3), oreb DECIMAL(3,1), dreb DECIMAL(3,1), reb DECIMAL(3,1), ast DECIMAL(3,1), tov DECIMAL(3,1), stl DECIMAL(3,1), blk DECIMAL(3,1), blka DECIMAL(3,1), pf DECIMAL(3,1), pfd DECIMAL(3,1), pts DECIMAL(3,1), plus_minus DECIMAL(3,1), nba_fantasy_pts DECIMAL, dd2 INT, td3 INT, wnba_fantasy_pts DECIMAL(3,1), gp_rank INT, w_rank INT, l_rank INT, w_pct_rank INT, min_rank INT, fgm_rank INT, fga_rank INT, fg_pct_rank INT, fg3m_rank INT, fg3a_rank INT, fg3_pct_rank INT, ftm_rank INT, fta_rank INT, ft_pct_rank INT, oreb_rank INT, dreb_rank INT, reb_rank INT, ast_rank INT, tov_rank INT, stl_rank INT, blk_rank INT, blka_rank INT, pf_rank INT, pfd_rank INT, pts_rank INT, plus_minus_rank INT, nba_fantasy_pts_rank INT, dd2_rank INT, td3_rank INT, wnba_fantasy_pts_rank INT, cfid INT, cfparams VARCHAR(255), season_id VARCHAR(255));")
 
 # cursor.execute("DROP TABLE nbastats")
-cursor.execute("SELECT player_name, pts FROM nbastats where player_name = %s", ("stephen curry",))
+cursor.execute("SELECT * FROM nbastats where player_name = %s and season_id = %s", ("stephen curry", "2021-22"))
 # cursor.execute("DELETE FROM nbastats")
-myresult = cursor.fetchall()
-print(myresult)
+# myresult = cursor.fetchall()
+for row in cursor:
+    print(row)
+# print(myresult)
 print(time.time() - t0)
 
 '''
