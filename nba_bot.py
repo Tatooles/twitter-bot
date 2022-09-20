@@ -10,6 +10,7 @@ import json
 import pandas as pd
 import tweepy
 import gspread
+import mysql.connector
 import exceptions
 
 df = None
@@ -24,6 +25,19 @@ def setup():
     # Open a sheet from a spreadsheet in one go
     global last_tweet
     last_tweet = gc.open("last-tweet-id").sheet1
+
+    with open('railway_credentials.json') as credentials:
+        creds = json.load(credentials)
+
+        global mydb
+        mydb = mysql.connector.connect(
+            host=creds['host'],
+            user=creds['user'],
+            password=creds['password'],
+            database=creds['database'],
+            port=creds['port']
+        )
+
 
     with open('tweepy_credentials.json') as tweepy_credentials:
         creds = json.load(tweepy_credentials)
@@ -98,12 +112,15 @@ def check_tweet(request_string):
 
     name = f"{tokens[2]} {tokens[3]}"
     player = df[(df['player_name'] == name)]
-    if player.empty:
+    cursor = mydb.cursor(buffered=True)
+    cursor.execute("SELECT * FROM nbastats where player_name = %s", (name,))
+    if cursor.fetchone() is None:
         raise exceptions.PlayerNotFoundException
         
     if not career:
         season = player[player['season_id'] == tokens[4]]
-        if season.empty:
+        cursor.execute("SELECT * FROM nbastats where player_name = %s AND season_id = %s", (name, tokens[4]))
+        if cursor.fetchone() is None:
             raise exceptions.SeasonOutOfRangeException
 
     # Find and fill stat data
@@ -114,6 +131,10 @@ def check_tweet(request_string):
             stat = round(stat, 1)
             stat_values.append(f'{stat} {stat_label}')
         else:
+            # Case where not a career stat
+            cursor.execute("SELECT %s FROM nbastats where player_name = %s AND season_id = %s", (stat_label, name, tokens[4]))
+            print(f"SELECT {stat_label} FROM nbastats where player_name = {name} AND season_id = {tokens[4]}")
+            print(cursor.fetchone())
             stat_values.append(f'{season.iloc[0][stat_label]} {stat_label}')
 
     # Want to convert list into a string with oxford comma
@@ -159,8 +180,6 @@ def process_request(request_string):
         return 'ERROR - I could not process your request. The player you requested did not play in that season'
     except exceptions.InvalidQueryException:
         return "ERROR - I could not process your request. Couldn\'t complete a valid query with the information you provided"
-    except:
-        return "ERROR - I could not process your request. Unknown exception occurred"
 
 def process_tweets():
     '''
