@@ -12,6 +12,8 @@ import gspread
 import mysql.connector
 import exceptions
 
+df = None
+
 def setup():
     '''
     Initialize a couple of global variables that will be used during execution.
@@ -19,7 +21,10 @@ def setup():
     global gc
     gc = gspread.service_account('gspread_credentials.json')
 
-    # Open DB connection
+    # Open a sheet from a spreadsheet in one go
+    global last_tweet
+    last_tweet = gc.open("last-tweet-id").sheet1
+
     with open('railway_credentials.json') as credentials:
         creds = json.load(credentials)
 
