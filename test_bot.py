@@ -21,7 +21,7 @@ class TestCalc(unittest.TestCase):
         
         self.assertEqual(result1, 'Zach Lavine averaged 27.4 pts in the 2020-21 season')
         self.assertEqual(result2, 'Michael Jordan averaged 28.7 pts in the 1997-98 season')
-        self.assertEqual(result3, 'Kyle Korver averaged 0.42 fg3_pct in the 2005-06 season')
+        self.assertEqual(result3, 'Kyle Korver averaged 0.420 fg3_pct in the 2005-06 season')
         self.assertEqual(result4, 'J.R. Reid averaged 0.3 plus_minus in the 1997-98 season')
 
     def test_career_stats(self):

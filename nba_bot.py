@@ -132,10 +132,10 @@ def check_tweet(request_string):
             stat_values.append(f'{stat} {stat_label}')
         else:
             # Case where not a career stat
-            cursor.execute("SELECT %s FROM nbastats where player_name = %s AND season_id = %s", (stat_label, name, tokens[4]))
-            print(f"SELECT {stat_label} FROM nbastats where player_name = {name} AND season_id = {tokens[4]}")
-            print(cursor.fetchone())
-            stat_values.append(f'{season.iloc[0][stat_label]} {stat_label}')
+            cursor.execute(f"SELECT {stat_label} FROM nbastats where player_name = %s AND season_id = %s", [name, tokens[4]])
+            stat = str(cursor.fetchone()[0])
+            print(stat)
+            stat_values.append(f'{stat} {stat_label}')
 
     # Want to convert list into a string with oxford comma
     # Ref: https://stackoverflow.com/a/53981846/
