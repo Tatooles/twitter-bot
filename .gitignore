@@ -1,5 +1,9 @@
 gspread_credentials.json
 tweepy_credentials.json
+railway_credentials.json
 basic_bot.py
 requirements.txt
 __pycache__/
+settings.json
+query.py
+SQL/
