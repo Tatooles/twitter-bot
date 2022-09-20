@@ -171,6 +171,8 @@ def process_request(request_string):
         return 'ERROR - I could not process your request. The player you requested did not play in that season'
     except exceptions.InvalidQueryException:
         return "ERROR - I could not process your request. Couldn\'t complete a valid query with the information you provided"
+    except:
+        return "ERROR - I could not process your request. Unknown exception occurred"
 
 def process_tweets():
     '''
