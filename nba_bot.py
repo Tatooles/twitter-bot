@@ -7,13 +7,10 @@ This file searches for recent mentions of this bot and responds with the stats t
 @Credit: https://www.youtube.com/watch?v=W0wWwglE1Vc for logic on replying to recent Twitter mentions.
 '''
 import json
-import pandas as pd
 import tweepy
 import gspread
 import mysql.connector
 import exceptions
-
-df = None
 
 def setup():
     '''
@@ -22,10 +19,7 @@ def setup():
     global gc
     gc = gspread.service_account('gspread_credentials.json')
 
-    # Open a sheet from a spreadsheet in one go
-    global last_tweet
-    last_tweet = gc.open("last-tweet-id").sheet1
-
+    # Open DB connection
     with open('railway_credentials.json') as credentials:
         creds = json.load(credentials)
 
@@ -104,21 +98,13 @@ def check_tweet(request_string):
         if stat not in column_names:
             raise exceptions.InvalidStatException
 
-    # Slow operations, only want to process once for each execution, and after faster error checks
-    global df
-    if df is None:
-        nba_stats = gc.open("nba-stats").sheet1
-        df = pd.DataFrame(nba_stats.get_all_records())
-
     name = f"{tokens[2]} {tokens[3]}"
-    player = df[(df['player_name'] == name)]
     cursor = mydb.cursor(buffered=True)
     cursor.execute("SELECT * FROM nbastats where player_name = %s", (name,))
     if cursor.fetchone() is None:
         raise exceptions.PlayerNotFoundException
         
     if not career:
-        season = player[player['season_id'] == tokens[4]]
         cursor.execute("SELECT * FROM nbastats where player_name = %s AND season_id = %s", (name, tokens[4]))
         if cursor.fetchone() is None:
             raise exceptions.SeasonOutOfRangeException
@@ -127,14 +113,14 @@ def check_tweet(request_string):
     stat_values = []
     for stat_label in stat_labels:
         if career:
-            stat = player[[stat_label]].mean().values[0]
+            cursor.execute(f"SELECT AVG({stat_label}) FROM nbastats where player_name = %s", [name])
+            stat = cursor.fetchone()[0]
             stat = round(stat, 1)
             stat_values.append(f'{stat} {stat_label}')
         else:
             # Case where not a career stat
             cursor.execute(f"SELECT {stat_label} FROM nbastats where player_name = %s AND season_id = %s", [name, tokens[4]])
             stat = str(cursor.fetchone()[0])
-            print(stat)
             stat_values.append(f'{stat} {stat_label}')
 
     # Want to convert list into a string with oxford comma
