@@ -36,6 +36,8 @@ def setup():
             database=creds['database'],
             port=creds['port']
         )
+        global cursor
+        cursor = mydb.cursor(buffered=True)
 
 
     with open('tweepy_credentials.json') as tweepy_credentials:
@@ -45,10 +47,13 @@ def setup():
         client = tweepy.Client(consumer_key=creds['consumerKey'], consumer_secret=creds['consumerSecret'], access_token=creds['accessToken'], access_token_secret=creds['accessToken_secret'])
 
 def storeId(last_seen_id):
+    cursor.execute("UPDATE lasttweet SET tweet = %s WHERE id = 1", (str(last_seen_id),))
+    mydb.commit()
     last_tweet.update('A2', str(last_seen_id))
 
 def retrieveId():
-    return int(last_tweet.acell('A2').value)
+    cursor.execute("SELECT tweet FROM lasttweet")
+    return int(cursor.fetchone()[0])
 
 def check_tweet(request_string):
     '''
@@ -104,7 +109,6 @@ def check_tweet(request_string):
             raise exceptions.InvalidStatException
 
     name = f"{tokens[2]} {tokens[3]}"
-    cursor = mydb.cursor(buffered=True)
     cursor.execute("SELECT * FROM nbastats where player_name = %s", (name,))
     if cursor.fetchone() is None:
         raise exceptions.PlayerNotFoundException
