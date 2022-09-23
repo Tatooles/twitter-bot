@@ -8,7 +8,6 @@ This file searches for recent mentions of this bot and responds with the stats t
 '''
 import json
 import tweepy
-import gspread
 import mysql.connector
 import exceptions
 
@@ -18,13 +17,6 @@ def setup():
     '''
     Initialize a couple of global variables that will be used during execution.
     '''
-    global gc
-    gc = gspread.service_account('gspread_credentials.json')
-
-    # Open a sheet from a spreadsheet in one go
-    global last_tweet
-    last_tweet = gc.open("last-tweet-id").sheet1
-
     with open('railway_credentials.json') as credentials:
         creds = json.load(credentials)
 
@@ -49,7 +41,6 @@ def setup():
 def storeId(last_seen_id):
     cursor.execute("UPDATE lasttweet SET tweet = %s WHERE id = 1", (str(last_seen_id),))
     mydb.commit()
-    last_tweet.update('A2', str(last_seen_id))
 
 def retrieveId():
     cursor.execute("SELECT tweet FROM lasttweet")
