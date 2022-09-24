@@ -11,8 +11,6 @@ import tweepy
 import mysql.connector
 import exceptions
 
-df = None
-
 def setup():
     '''
     Initialize a couple of global variables that will be used during execution.
