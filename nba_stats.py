@@ -6,9 +6,30 @@ This file scrapes the NBA stats api on stat.nba.com and stores the data in a Goo
 @Author: Kevin Tatooles
 @Credit: https://www.youtube.com/watch?v=IELK56jIsEo&t=752s for scraping the NBA website.
 '''
+from time import time
 import requests
 import pandas as pd
 import gspread
+import numpy as np
+import json
+import mysql.connector
+import time
+
+def setup():
+    with open('railway_credentials.json') as credentials:
+        creds = json.load(credentials)
+
+        global mydb
+        mydb = mysql.connector.connect(
+            host=creds['host'],
+            user=creds['user'],
+            password=creds['password'],
+            database=creds['database'],
+            port=creds['port']
+        )
+
+        global cursor
+        cursor = mydb.cursor(buffered=True)
 
 def fetch_data(seasons):
     '''
@@ -104,16 +125,34 @@ def fetch_data(seasons):
 
     season_data = []
 
+    count = 0
+    t0 = time.time()
+
     for season in seasons:
         request_url = f"https://stats.nba.com/stats/leaguedashplayerstats?College=&Conference=&Country=&DateFrom=&DateTo=&Division=&DraftPick=&DraftYear=&GameScope=&GameSegment=&Height=&LastNGames=0&LeagueID=00&Location=&MeasureType=Base&Month=0&OpponentTeamID=0&Outcome=&PORound=0&PaceAdjust=N&PerMode=PerGame&Period=0&PlayerExperience=&PlayerPosition=&PlusMinus=N&Rank=N&Season={season}&SeasonSegment=&SeasonType=Regular+Season&ShotClockRange=&StarterBench=&TeamID=0&TwoWay=0&VsConference=&VsDivision=&Weight="
         response = requests.get(url=request_url, headers=headers).json()
         player_info = response['resultSets'][0]['rowSet']
-        df = pd.DataFrame(player_info, columns=column_names)
-        df['season_id'] = season
-        print(season)
-        season_data.append(df)
+        # numpy = np.asarray(player_info)
+        # numpy = np.delete(numpy, [36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65], axis=1)
+        # print(numpy)
+        # Remove columns from 36 to 65, that's like half of it lmao
+        for row in player_info:
+            row.append(season)
+            sql = "insert into nbastats values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"
+            cursor.execute(sql, row)
+            mydb.commit()
+            print(f"Inserted record {count} of 12475")
+            count += 1
+        
+        # break
+        # df = pd.DataFrame(player_info, columns=column_names)
+        # df['season_id'] = season
+        # print(season)
+        # season_data.append(df)
 
-    return pd.concat(season_data, sort=False)
+    print(f"Total time: {time.time() - t0}")
+
+    # return pd.concat(season_data, sort=False)
 
 
 def save_data(data):
@@ -160,11 +199,12 @@ if __name__ == '__main__':
         '2020-21',
         '2021-22'
     ]
-
-    data = fetch_data(seasons)
+    
+    setup()
+    fetch_data(seasons)
     # Convert all text data to lowercase because tweet will be converted to lowercase
-    data = data.applymap(lambda s: s.lower() if type(s) == str else s)
-    # Want columns also lowercase
-    data.columns = data.columns.str.lower()
-    save_data(data)
+    # data = data.applymap(lambda s: s.lower() if type(s) == str else s)
+    # # Want columns also lowercase
+    # data.columns = data.columns.str.lower()
+    # save_data(data)
     
